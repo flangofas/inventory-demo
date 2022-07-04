@@ -15,7 +15,8 @@
         "php": "8.0.20"
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.8",
-        "symfony/var-dumper": "^6.0"
+        "phpstan/phpstan": "*",
+        "symfony/var-dumper": "*",
+        "friendsofphp/php-cs-fixer": "*"
     }
 }
