@@ -1,4 +1,4 @@
 .idea/
 /vendor/
 phpstan.neon
-
+.php-cs-fixer.cache
