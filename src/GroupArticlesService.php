@@ -6,8 +6,8 @@ namespace Inventory;
 
 final class GroupArticlesService
 {
-    /** @var array<int,mixed> */
-    private array $groups = [];
+    /** @var array<mixed> */
+    private array $data = [];
     /** @var int[] */
     private const EXCEPTION_GROUPS = [0];
 
@@ -15,53 +15,68 @@ final class GroupArticlesService
      * @param array<int, array<string, mixed>> $records
      * @return array<int,mixed>
      */
-    public function handle(array $records): array
+    public function handle(string|callable $rule, array $records): array
     {
-        $this->buildGroups($records);
-
-        $this->summarizeGroups();
-
-        $this->sortGroupsBy('price', 'desc');
-
-        return $this->groups;
-    }
-
-    /** @param array<int,array<string,mixed>> $records */
-    private function buildGroups(array $records): void
-    {
-        $articles = array_map(fn($attributes) => new Article(...$attributes), $records);
-
-        foreach ($articles as $article) {
-            $this->groups[$article->group()][] = $article;
+        if (is_callable($rule)) {
+            $rule = $rule();
         }
+
+        $this->combineBy($rule, $this->buildArticles($records));
+
+        $this->groupBy($rule);
+
+        $this->sortBy('price', 'desc');
+
+        return $this->data;
     }
 
-    private function summarizeGroups(): void
+    /**
+     * @param array<int, array<string, mixed>> $records
+     * @return array<int,Article>
+     */
+    private function buildArticles(array $records): array
     {
-        foreach (array_keys($this->groups) as $group) {
-            if (in_array($group, self::EXCEPTION_GROUPS, true)) {
-                continue;
-            }
-
-            $this->groups[$group] = [$this->summarizeGroup($group, $this->groups[$group])];
-        }
-    }
-
-    private function sortGroupsBy(string $key = 'group', string $direction = 'asc'): void
-    {
-        $flatten = array_reduce($this->groups, 'array_merge', []);
-
-        $method = $direction === 'asc' ? 'isGreaterThan' : 'isSmallerThan';
-        uasort($flatten, fn(Article $a, Article $b) => $a->{$method}($b));
-
-        $this->groups = $flatten;
+        return array_map(fn ($attributes) => new Article(...$attributes), $records);
     }
 
     /** @param array<int,Article> $articles */
-    private function summarizeGroup(int $group, array $articles): Article
+    private function combineBy(string $rule, array $articles): void
+    {
+        foreach ($articles as $article) {
+            $key = method_exists($article, $rule) ? $article->{$rule}() : $rule;
+
+            $this->data[$key][] = $article;
+        }
+    }
+
+    private function groupBy(string $rule): void
+    {
+        foreach (array_keys($this->data) as $key) {
+            if ($rule === 'group' &&
+                in_array($key, self::EXCEPTION_GROUPS, true)) {
+                continue;
+            }
+
+            $this->data[$key] = [$this->summarize($this->data[$key])];
+        }
+    }
+
+    private function sortBy(string $key, string $direction): void
+    {
+        $flatten = array_reduce($this->data, 'array_merge', []);
+
+        $method = $direction === 'asc' ? 'isGreaterThan' : 'isSmallerThan';
+        uasort($flatten, fn (Article $a, Article $b) => $a->{$method}($b, $key));
+
+        $this->data = $flatten;
+    }
+
+    /** @param array<int,Article> $articles */
+    private function summarize(array $articles): Article
     {
         $sumPrice = 0;
         $uniqueNames = [];
+        $group = '';
 
         foreach ($articles as $article) {
             $name = $article->name();
@@ -69,6 +84,7 @@ final class GroupArticlesService
                 $uniqueNames[] = $name;
             }
 
+            $group = $article->group();
             $sumPrice += $article->price();
         }
 

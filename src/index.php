@@ -7,7 +7,15 @@ use Inventory\GroupArticlesService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$service = new GroupArticlesService;
-$data = $service->handle(ArticlesInMemoryPersistence::fetchArticles());
+// Rules
+//as string
+$rule = 'group';
+//Or callable
+//$rule = function(): string {
+//    return uniqid();
+//};
 
-dump($data);
+$service = new GroupArticlesService();
+$data = $service->handle($rule, ArticlesInMemoryPersistence::fetchArticles());
+
+dd($data);

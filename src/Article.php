@@ -12,7 +12,7 @@ final class Article
     private int $group;
     private int $price;
 
-    public function __construct(string $name, int $group, int $price)
+    public function __construct(string $name, mixed $group, int $price)
     {
         if ($name === '') {
             throw new InvalidArgumentException('Article name cannot be empty');
