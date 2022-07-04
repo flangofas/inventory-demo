@@ -2,7 +2,7 @@
 
 ### Clone it 
 ```
-git clone git@github.com:flangofas/inventory-demo.git
+git clone https://github.com/flangofas/inventory-demo.git
 composer install
 ```
 
