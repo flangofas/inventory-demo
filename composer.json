@@ -1,0 +1,21 @@
+{
+    "name": "flangofas/billiger-mietwagen",
+    "autoload": {
+        "psr-4": {
+            "Inventory\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Antonis Flangofas",
+            "email": "antonisflags@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "8.0.20"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.8",
+        "symfony/var-dumper": "^6.0"
+    }
+}
