@@ -21,7 +21,7 @@ final class GroupArticlesService
 
         $this->summarizeGroups();
 
-        $this->sortGroups();
+        $this->sortGroupsBy('price', 'desc');
 
         return $this->groups;
     }
@@ -47,9 +47,14 @@ final class GroupArticlesService
         }
     }
 
-    private function sortGroups(): void
+    private function sortGroupsBy(string $key = 'group', string $direction = 'asc'): void
     {
-        ksort($this->groups);
+        $flatten = array_reduce($this->groups, 'array_merge', []);
+
+        $method = $direction === 'asc' ? 'isGreaterThan' : 'isSmallerThan';
+        uasort($flatten, fn(Article $a, Article $b) => $a->{$method}($b));
+
+        $this->groups = $flatten;
     }
 
     /** @param array<int,Article> $articles */

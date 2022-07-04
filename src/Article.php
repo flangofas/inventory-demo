@@ -37,4 +37,14 @@ final class Article
     {
         return $this->price;
     }
+
+    public function isSmallerThan(Article $b, string $key): bool
+    {
+        return $this->{$key}() < $b->{$key}();
+    }
+
+    public function isGreaterThan(Article $b, string $key): bool
+    {
+        return $this->{$key}() > $b->{$key}();
+    }
 }
